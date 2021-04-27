@@ -121,7 +121,7 @@ kubectl get pod cockroachdb-2
 ### Add a node
 
 ```bash
-sed 's/nodes: 3/nodes: 4/' example.yaml
+sed -i.saved 's/nodes: 3/nodes: 4/' example.yaml
 ```
 
 ```bash
@@ -131,7 +131,7 @@ kubectl get pods
 
 ### Remove a node
 
-https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes#step-7-remove-nodes 
+[Instructions](https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes#step-7-remove-nodes)
 
 #### Get node IDs
 
@@ -148,7 +148,7 @@ kubectl exec -it cockroachdb-3 -- ./cockroach node decommission --self --certs-d
 #### Once decommissiong is done, apply cluster config without that node
 
 ```bash
-sed 's/nodes: 4/nodes: 3/' example.yaml
+sed -i.saved 's/nodes: 4/nodes: 3/' example.yaml
 ```
 
 ```bash
@@ -166,7 +166,7 @@ kubectl exec -it cockroachdb-2 -- ./cockroach sql --certs-dir cockroach-certs --
 Change the cockroachdDB version in the example.yaml
 
 ```bash
-sed 's/cockroach:v20.2.7/cockroach:v20.2.8/' example.yaml
+sed -i.saved 's/cockroach:v20.2.7/cockroach:v20.2.8/' example.yaml
 ```
 
 ```bash
@@ -201,6 +201,52 @@ kubectl exec -it cockroachdb-2 -- ./cockroach workload run ycsb \
  'postgresql://root@cockroachdb-0.cockroachdb.default:26257?sslcert=%2Fcockroach%2Fcockroach-certs%2Fclient.root.crt&sslkey=%2Fcockroach%2Fcockroach-certs%2Fclient.root.key&sslmode=verify-full&sslrootcert=%2Fcockroach%2Fcockroach-certs%2Fca.crt'
  ```
 
+### Online Schema Change
+
+```bash
+kubectl exec -it cockroachdb-2 -- ./cockroach sql --certs-dir cockroach-certs 
+```
+
+```sql
+CREATE TABLE users (
+  name STRING PRIMARY KEY,
+  email STRING
+);
+
+SHOW CREATE TABLE users;
+
+INSERT INTO users (name, email) VALUES ('John Doe', 'john@cockroachlabs.com');
+
+SELECT * FROM users;
+```
+
+```sql
+ALTER TABLE users ADD COLUMN id UUID NOT NULL DEFAULT gen_random_uuid();
+ALTER TABLE users ALTER PRIMARY KEY USING COLUMNS (id);
+
+SHOW CREATE TABLE users;
+
+DROP INDEX users_name_key CASCADE;
+
+SHOW CREATE TABLE users;
+```
+
+### Backup a database
+
+```sql
+BACKUP DATABASE defaultdb TO 'userfile://defaultdb.public.userfiles_root/database-defaultdb-weekly' AS OF SYSTEM TIME '-10s';
+```
+
+### Restore a table from backup
+
+```sql
+CREATE DATABASE newdb;
+
+RESTORE defaultdb.users FROM 'userfile://defaultdb.public.userfiles_root/database-defaultdb-weekly' WITH into_db = 'newdb';
+
+SELECT * FROM newdb.users;
+```
+
 ### Stop the CockroachDB cluster
 
 #### Delete the StatefulSet
@@ -229,5 +275,5 @@ minikube delete
 ```
 
 ```bash
-sed 's/cockroach:v20.2.8/cockroach:v20.2.7/' example.yaml
+sed -i.saved 's/cockroach:v20.2.8/cockroach:v20.2.7/' example.yaml
 ```
