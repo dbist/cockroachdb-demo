@@ -43,6 +43,7 @@ Connect to the [OpenShift Console](https://oauth-openshift.apps-crc.testing/)
 oc create namespace cockroachdb
 oc config view --minify | grep namespace:
 oc config set-context --current --namespace=cockroachdb
+oc config view --minify | grep namespace:
 ```
 
 ### Follow the OpenShift [Tutorial](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html) for CockroachDB
@@ -55,7 +56,50 @@ oc config set-context --current --namespace=cockroachdb
 oc get pods --watch
 ```
 
+### Install an instance of CockroachDB
+
 ### Create a secure [client pod](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html#step-4-create-a-secure-client-pod)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crdb-client-secure
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/instance: crdb-tls-example
+    app.kubernetes.io/name: cockroachdb
+spec:
+  serviceAccountName: cockroach-operator-sa
+  containers:
+  - name: crdb-client-secure
+    image: registry.connect.redhat.com/cockroachdb/cockroach:v20.2.8
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: client-certs
+      mountPath: /cockroach/cockroach-certs/
+    command:
+    - sleep
+    - "2147483648" # 2^31
+  terminationGracePeriodSeconds: 0
+  volumes:
+  - name: client-certs
+    projected:
+        sources:
+          - secret:
+              name: crdb-tls-example-node
+              items:
+                - key: ca.crt
+                  path: ca.crt
+          - secret:
+              name: crdb-tls-example-root
+              items:
+                - key: tls.crt
+                  path: client.root.crt
+                - key: tls.key
+                  path: client.root.key
+        defaultMode: 256
+```
 
 Or deploy manually
 
