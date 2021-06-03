@@ -7,7 +7,7 @@
 1. CockroachDB Operator
 2. OpenShift and/or [Red Hat CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview)
 
-## Configure CRC
+### Configure CRC
 
 ```bash
 crc start
@@ -35,7 +35,7 @@ Use the 'oc' command line interface:
   $ oc login -u kubeadmin https://api.crc.testing:6443
 ```
 
-### Save the password for kubeadmin
+#### Save the password for kubeadmin
 
 Connect to the [OpenShift Console](https://oauth-openshift.apps-crc.testing/)
 
@@ -46,19 +46,19 @@ oc config set-context --current --namespace=cockroachdb
 oc config view --minify | grep namespace:
 ```
 
-### Follow the OpenShift [Tutorial](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html) for CockroachDB
+#### Follow the OpenShift [Tutorial](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html) for CockroachDB
 
-### Install the Operator through the Operator Hub
+##### Install the Operator through the Operator Hub
 
-### Check whether the operator is up
+##### Check whether the operator is up
 
 ```bash
 oc get pods --watch
 ```
 
-### Install an instance of CockroachDB
+##### Install an instance of CockroachDB
 
-### Create a secure [client pod](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html#step-4-create-a-secure-client-pod)
+##### Create a secure [client pod](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html#step-4-create-a-secure-client-pod)
 
 ```yaml
 apiVersion: v1
@@ -107,7 +107,7 @@ Or deploy manually
 oc apply -f client.yaml
 ```
 
-### Create a SQL user
+##### Create a SQL user
 
 ```bash
 oc exec -it crdb-client-secure -- ./cockroach sql --certs-dir=/cockroach/cockroach-certs/ --host=crdb-tls-example-public
@@ -120,7 +120,7 @@ GRANT ADMIN TO roach;
 SET CLUSTER SETTING server.time_until_store_dead = '1m15s';
 ```
 
-### Access the DB Console
+##### Access the DB Console
 
 ```bash
 oc port-forward service/crdb-tls-example-public 8080
@@ -128,44 +128,7 @@ oc port-forward service/crdb-tls-example-public 8080
 
 Open the [DB Console](http://localhost:8080)
 
-### Simulate a node failure
-
-```bash
-oc delete pod crdb-tls-example-2
-oc get pods --watch
-```
-
-### Add a node
-
-Go to StatefulSets/crdb-tls-example and click Number of nodes, enter 4 and press enter
-
-### Remove a node
-
-#### Get node IDs
-
-```bash
-oc exec -it crdb-tls-example-1 -- ./cockroach node status --certs-dir cockroach-certs
-```
-
-#### Decommission a node
-
-```bash
-oc exec -it crdb-tls-example-1 -- ./cockroach node decommission --self --certs-dir cockroach-certs --host=crdb-tls-example-3.crdb-tls-example.cockroachdb:26258
-```
-
-#### When node is decommissioned
-
-Follow the same steps as adding a node and replace 4 nodes with 3
-
-### Upgrade the cluster
-
-TODO
-
-### Upgrade the Operator
-
-TODO
-
-### Run a workload
+##### Run a workload
 
 ```bash
 oc exec -it crdb-client-secure -- ./cockroach workload \
@@ -184,7 +147,44 @@ oc exec -it crdb-client-secure -- ./cockroach workload \
  'postgresql://root@crdb-tls-example-0.crdb-tls-example.cockroachdb:26257?sslcert=%2Fcockroach%2Fcockroach-certs%2Fclient.root.crt&sslkey=%2Fcockroach%2Fcockroach-certs%2Fclient.root.key&sslmode=verify-full&sslrootcert=%2Fcockroach%2Fcockroach-certs%2Fca.crt'
  ```
 
-### Online Schema Change
+##### Simulate a node failure
+
+```bash
+oc delete pod crdb-tls-example-2
+oc get pods --watch
+```
+
+##### Add a node
+
+Go to StatefulSets/crdb-tls-example and click Number of nodes, enter 4 and press enter
+
+#### Remove a node
+
+##### Get node IDs
+
+```bash
+oc exec -it crdb-tls-example-1 -- ./cockroach node status --certs-dir cockroach-certs
+```
+
+##### Decommission a node
+
+```bash
+oc exec -it crdb-tls-example-1 -- ./cockroach node decommission --self --certs-dir cockroach-certs --host=crdb-tls-example-3.crdb-tls-example.cockroachdb:26258
+```
+
+##### When node is decommissioned
+
+Follow the same steps as adding a node and replace 4 nodes with 3
+
+#### Upgrade the cluster
+
+TODO
+
+#### Upgrade the Operator
+
+TODO
+
+#### Online Schema Change
 
 ```bash
 oc exec -it crdb-client-secure -- ./cockroach sql --certs-dir=/cockroach/cockroach-certs/ --host=crdb-tls-example-public
@@ -208,20 +208,20 @@ ALTER TABLE tpcc.stock DROP COLUMN val;
 SHOW CREATE TABLE tpcc.stock;
 ```
 
-### Drop a table
+#### Drop a table
 
 ```sql
 SELECT COUNT(*) FROM tpcc.order_line;
 DROP TABLE tpcc.order_line;
 ```
 
-### Backup a database
+#### Backup a database
 
 ```sql
 BACKUP DATABASE tpcc TO 'userfile://tpcc.public.userfiles_root/database-tpcc' AS OF SYSTEM TIME '-1m';
 ```
 
-### Restore a table from backup
+#### Restore a table from backup
 
 ```sql
 RESTORE tpcc.order_line FROM 'userfile://tpcc.public.userfiles_root/database-tpcc' WITH skip_missing_foreign_keys;
@@ -229,23 +229,23 @@ RESTORE tpcc.order_line FROM 'userfile://tpcc.public.userfiles_root/database-tpc
 SELECT COUNT(*) FROM tpcc.order_line;
 ```
 
-### Stop the CockroachDB cluster
+#### Stop the CockroachDB cluster
 
-#### Delete the cluster
+##### Delete the cluster
 
 Go to CrdbClusters/crdb-tls-example/actions/delete
 
-#### Delete the persistent volumes and persistent volume claims
+##### Delete the persistent volumes and persistent volume claims
 
 ```bash
 oc delete pv,pvc --all
 ```
 
-#### Remove the Operator
+##### Remove the Operator
 
 Go to installed operators/uninstall
 
-#### Delete the client pod
+##### Delete the client pod
 
 Go to pods/crdb-client-secure/delete pod
 
