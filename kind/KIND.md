@@ -12,9 +12,7 @@ kind get clusters
 kubectl cluster-info --context kind-kind
 ```
 
-### Follow the standard CockroachDB tutorial to start CockroachDB using Kubernetes
-
-[Tutorial](https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes)
+### Follow the standard CockroachDB [Tutorial](https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes) to start CockroachDB using Kubernetes
 
 ### Apply the Operator CRD
 
@@ -85,46 +83,7 @@ kubectl get pods --watch
 
 ### Create a SQL client
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: crdb-client-secure
-  labels:
-    app.kubernetes.io/component: database
-    app.kubernetes.io/instance: cockroachdb
-    app.kubernetes.io/name: cockroachdb
-spec:
-  serviceAccountName: cockroach-operator-sa
-  containers:
-  - name: crdb-client-secure
-    image: cockroachdb/cockroach:v20.2.9
-    imagePullPolicy: IfNotPresent
-    volumeMounts:
-    - name: client-certs
-      mountPath: /cockroach/cockroach-certs/
-    command:
-    - sleep
-    - "2147483648" # 2^31
-  terminationGracePeriodSeconds: 0
-  volumes:
-  - name: client-certs
-    projected:
-        sources:
-          - secret:
-              name: crdb-tls-example-node
-              items:
-                - key: ca.crt
-                  path: ca.crt
-          - secret:
-              name: crdb-tls-example-root
-              items:
-                - key: tls.crt
-                  path: client.root.crt
-                - key: tls.key
-                  path: client.root.key
-        defaultMode: 256
-```
+### DOES NOT WORK
 
 ```bash
 kubectl apply -f client.yaml
@@ -140,7 +99,7 @@ kubectl get services
 ### Create a SQL user
 
 ```bash
-kubectl  exec -it crdb-client-secure -- ./cockroach sql --certs-dir=/cockroach-certs/ --host=cockroachdb-public
+kubectl  exec -it cockroachdb-client-secure -- ./cockroach sql --certs-dir=/cockroach-certs/ --host=cockroachdb-public
 ```
 
 ```bash
@@ -154,7 +113,7 @@ GRANT ADMIN TO roach;
 
 ### Access the DB Console
 
-#### TEST THIS
+#### INGRESS DOES NOT WORK YET
 
 #### From this [tutorial](https://ralph.blog.imixs.com/2021/04/22/cockroachdb-kubernetes/)
 
@@ -163,6 +122,8 @@ GRANT ADMIN TO roach;
 ```bash
 kubectl apply -f 030-ingress.yaml
 ```
+
+#### Continue with client 
 
 ```bash
 kubectl port-forward service/cockroachdb-public 8080
@@ -188,9 +149,7 @@ kubectl apply -f example.yaml
 kubectl get pods
 ```
 
-### Remove a node
-
-https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes#step-7-remove-nodes 
+### Remove a node using the following [steps](https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes#step-7-remove-nodes)
 
 #### Get node IDs
 
@@ -198,7 +157,7 @@ https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubern
 kubectl exec -it cockroachdb-2 -- ./cockroach node status --certs-dir cockroach-certs
 ```
 
-#### Decommission node
+#### Decommission a node
 
 ```bash
 kubectl exec -it cockroachdb-3 -- ./cockroach node decommission --self --certs-dir cockroach-certs --host=cockroachdb-3.cockroachdb.default:26258
@@ -294,5 +253,3 @@ kind delete cluster
 ```bash
 mv example.yaml.saved example.yaml
 ```
-
-

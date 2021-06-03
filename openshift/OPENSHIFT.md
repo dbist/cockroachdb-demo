@@ -37,9 +37,7 @@ oc config view --minify | grep namespace:
 oc config set-context --current --namespace=cockroachdb
 ```
 
-### Follow the OpenShift tutorial for CockroachDB
-
-[Tutorial](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html)
+### Follow the OpenShift [Tutorial](https://www.cockroachlabs.com/docs/v21.1/deploy-cockroachdb-with-kubernetes-openshift.html) for CockroachDB
 
 ### Check the Operator is up
 
