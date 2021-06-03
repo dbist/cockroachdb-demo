@@ -123,7 +123,7 @@ GRANT ADMIN TO roach;
 kubectl apply -f 030-ingress.yaml
 ```
 
-#### Continue with client 
+#### Continue with client
 
 ```bash
 kubectl port-forward service/cockroachdb-public 8080
@@ -229,6 +229,7 @@ kubectl exec -it cockroachdb-2 -- ./cockroach workload \
 
 ```bash
 kubectl delete -f example.yaml
+kubectl delete -f 030-ingress.yaml 
 ```
 
 #### Delete the persistent volumes and persistent volume claims

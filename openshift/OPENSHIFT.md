@@ -1,6 +1,11 @@
-# CockroachDB Magic Demo
+# CockroachDB OpenShift Demo
 
 ---
+
+## Requirements
+
+1. CockroachDB Operator
+2. OpenShift and/or [Red Hat CodeReady Containers](https://developers.redhat.com/products/codeready-containers/overview)
 
 ## Configure CRC
 
