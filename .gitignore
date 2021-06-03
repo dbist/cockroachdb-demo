@@ -16,4 +16,4 @@
 
 workspace
 *.code-workspace
-openshift/pull-secret.txt
+./openshift/pull-secret.txt
