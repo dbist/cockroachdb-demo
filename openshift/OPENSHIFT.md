@@ -37,7 +37,15 @@ Use the 'oc' command line interface:
 
 #### Save the password for kubeadmin
 
-Connect to the [OpenShift Console](https://oauth-openshift.apps-crc.testing/)
+Connect to the [OpenShift Console](https://console-openshift-console.apps-crc.testing)
+
+The same can be done using
+
+```bash
+crc console
+```
+
+#### Create a CockroachDB namespace
 
 ```bash
 oc create namespace cockroachdb
