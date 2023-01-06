@@ -5,6 +5,7 @@
 ## Configure minikube
 
 ```bash
+minikube delete
 kubectl config set-context minikube
 minikube config set memory 16384
 minikube config set cpus 8
@@ -12,7 +13,7 @@ minikube config set cpus 8
 
 ### Follow the standard CockroachDB tutorial to start CockroachDB using Kubernetes
 
-[Tutorial](https://www.cockroachlabs.com/docs/v20.2/orchestrate-a-local-cluster-with-kubernetes)
+[Tutorial](https://www.cockroachlabs.com/docs/stable/orchestrate-a-local-cluster-with-kubernetes.html)
 
 ```bash
 minikube start --driver=hyperkit
@@ -27,13 +28,19 @@ minikube start --driver=hyperkit
 ### Apply the Operator CRD
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/master/config/crd/bases/crdb.cockroachlabs.com_crdbclusters.yaml
+kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/v2.5.0/install/crds.yaml
 ```
 
 ### Install the operator manifest
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/master/manifests/operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach-operator/v2.5.0/install/operator.yaml
+```
+
+### Set the proper context
+
+```bash
+kubectl config set-context --current --namespace=cockroach-operator-system
 ```
 
 ### Check the Operator is up
@@ -48,36 +55,6 @@ kubectl get pods --watch
 curl -O https://raw.githubusercontent.com/cockroachdb/cockroach-operator/
 master/examples/example.yaml
 ```
-
-### Working config as of 04/26/21
-
-```yaml
-apiVersion: crdb.cockroachlabs.com/v1alpha1
-kind: CrdbCluster
-metadata:
-  name: cockroachdb
-spec:
-  dataStore:
-    pvc:
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: "4Gi"
-        volumeMode: Filesystem
-  resources:
-    requests:
-      cpu: "1"
-      memory: "2Gi"
-    limits:
-      cpu: "1"
-      memory: "2Gi"
-  tlsEnabled: true
-  image:
-    name: cockroachdb/cockroach:v20.2.9
-  nodes: 3
-  ```
 
 ### Start the CockroachDB cluster using the config
 
@@ -109,7 +86,7 @@ spec:
     image: cockroachdb/cockroach:v20.2.9
     imagePullPolicy: IfNotPresent
     volumeMounts:
-    - name: client-certs
+    - name: client-certs`
       mountPath: /cockroach/cockroach-certs/
     command:
     - sleep

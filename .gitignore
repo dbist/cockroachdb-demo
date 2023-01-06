@@ -17,3 +17,5 @@
 workspace
 *.code-workspace
 ./openshift/pull-secret.txt
+
+.DS_Store
