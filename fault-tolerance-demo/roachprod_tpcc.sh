@@ -66,7 +66,7 @@ for i in "${app_nodes[@]}"; do
     roachprod run ${cluster}:$i "./cockroach workload run tpcc \"postgresql://root@${PGHOST}:26000/tpcc?sslmode=disable\" \
       --active-warehouses 100 \
       --warehouses 100 \
-      --duration 180m \
+      --duration 60m \
       --idle-conns 100 \
       --tolerate-errors \
       --workers 1000 2>&1 > tpcc.log | tee -a /dev/null" &
