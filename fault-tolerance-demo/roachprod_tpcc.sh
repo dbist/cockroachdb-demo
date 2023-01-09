@@ -1,12 +1,12 @@
-# https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html
-
 # Roachprod
+
+## based on # https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html
 
 export cluster="${USER}-poc"
 export nodes=10
 export zones="eastus2"
 export ssd=2
-export version="v22.2.2"
+export version="v22.1.12"
 export lb=${nodes}
 export app1=$(($nodes - 1))
 export app2=$(($nodes - 2))
@@ -38,6 +38,11 @@ roachprod run ${cluster}:${lb} 'haproxy -f haproxy.cfg -D'
 echo "Configure store dead time"
 roachprod sql ${cluster}:1 -- -e "SET CLUSTER SETTING server.time_until_store_dead = '1m15s';"
 
+# Configure rebalance rates
+echo "Configure rebalance rates"
+roachprod sql ${cluster}:1 -- -e "SET CLUSTER SETTING kv.snapshot_rebalance.max_rate = '512MB';"
+roachprod sql ${cluster}:1 -- -e "SET CLUSTER SETTING kv.snapshot_recovery.max_rate = '512MB';"
+
 # Create tpcc database
 echo "Create tpcc database"
 roachprod sql ${cluster}:1 -- -e "CREATE DATABASE IF NOT EXISTS tpcc;"
@@ -57,11 +62,11 @@ roachprod run ${cluster}:${app1} "./cockroach workload init tpcc --warehouses 10
 # Run the tpcc workload
 echo "Run the tpcc workload"
 declare -a app_nodes=(${app1} ${app2} ${app3})
-for i in "${app_nodes[@]}"; do 
+for i in "${app_nodes[@]}"; do
     roachprod run ${cluster}:$i "./cockroach workload run tpcc \"postgresql://root@${PGHOST}:26000/tpcc?sslmode=disable\" \
       --active-warehouses 100 \
       --warehouses 100 \
-      --duration 60m \
+      --duration 180m \
       --idle-conns 100 \
       --tolerate-errors \
       --workers 1000 2>&1 > tpcc.log | tee -a /dev/null" &
@@ -69,7 +74,7 @@ done
 
 # Decommission a node
 # echo "Decommission a node"
-# roachprod run ${cluster}:1 -- "./cockroach node decommission 3 --insecure" 
+# roachprod run ${cluster}:1 -- "./cockroach node decommission 3 --insecure"
 
 # Drain a node
 # echo "Drain a node"

@@ -2,7 +2,6 @@ Fault Tolerance & Recovery
 
 Step 4. Check the workload
 
-
 Step 5. Simulate a single node failure
 
 DOWNED=$((1 + $RANDOM % 6))
@@ -39,3 +38,11 @@ roachprod run ${cluster}:1 -- "./cockroach node drain $DOWNED1 --insecure"
 roachprod run ${cluster}:1 -- "./cockroach node decommission $DOWNED1 --insecure"
 roachprod wipe ${cluster}:$DOWNED1
 roachprod start ${cluster}:$DOWNED1
+
+Step 13. Upgrade a node
+
+roachprod sql ${cluster}:1 -- -e "SET CLUSTER SETTING server.time_until_store_dead = '5m';"
+roachprod run ${cluster}:1 -- "./cockroach node drain $DOWNED2 --insecure"
+roachprod wipe ${cluster}:$DOWNED2
+roachprod stage ${cluster}:$DOWNED2 release v22.2.2
+roachprod start ${cluster}:$DOWNED2
