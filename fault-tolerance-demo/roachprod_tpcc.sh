@@ -1,12 +1,12 @@
 # Roachprod
 
-## based on # https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html
+## based on https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html
 
-export cluster="${USER}-poc"
+export cluster="${USER}-tpcc"
 export nodes=10
 export zones="eastus2"
 export ssd=2
-export version="v22.1.12"
+export version="v22.1.13"
 export lb=${nodes}
 export app1=$(($nodes - 1))
 export app2=$(($nodes - 2))

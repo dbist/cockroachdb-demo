@@ -1,5 +1,5 @@
 # Multiregion serverless
-
+export PGPASSWORD
 
 drop table new_order;
 drop table order_line;
@@ -31,7 +31,7 @@ cockroach sql --url "postgresql://artem:changeme1234567@artem-serverless-mr-10.g
 cockroach workload init tpcc \
  --db defaultdb \
  --warehouses 100 \
- "postgresql://artem:changeme1234567@artem-serverless-mr-10.gww.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
+ "postgresql://artem:$PGPASSWORD@artem-serverless-mr-10.gww.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
 
 ## run workload
 
@@ -41,7 +41,7 @@ cockroach workload run tpcc --db defaultdb "postgresql://artem:changeme1234567@a
  --duration 60m \
  --idle-conns 100 \
  --tolerate-errors \
- --workers 1000 
+ --workers 1000
 
 
 cockroach workload run tpcc --db defaultdb "postgresql://artem:changeme1234567@artem-serverless-mr-10.gww.gcp-europe-west1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full" \
@@ -50,4 +50,4 @@ cockroach workload run tpcc --db defaultdb "postgresql://artem:changeme1234567@a
  --duration 60m \
  --idle-conns 100 \
  --tolerate-errors \
- --workers 1000 
+ --workers 1000
