@@ -3,7 +3,7 @@
 ## based on https://www.postgresql.org/docs/current/pgbench.html
 
 export cluster="${USER}-pgbench"
-export nodes=10
+export nodes=13
 export zones="eastus2"
 export ssd=2
 export version="v22.1.13"
@@ -59,6 +59,7 @@ for i in {0..2}; do
     roachprod run ${cluster}:$(($app - $i)) -- "sudo usermod -aG docker ubuntu"
     roachprod run ${cluster}:$(($app - $i)) -- "newgrp docker"
     roachprod run ${cluster}:$(($app - $i)) -- "docker pull postgres"
+    roachprod run ${cluster}:$(($app - $i)) -- "docker pull flyway/flyway"
     roachprod put ${cluster}:$(($app - $i)) tpcb-cockroach.sql .
     roachprod run ${cluster}:$(($app - $i)) -- "echo export PGHOST=${PGHOST} >> ~/.bashrc"
     roachprod run ${cluster}:$(($app - $i)) -- "echo export PGUSER=root >> ~/.bashrc"
@@ -66,6 +67,7 @@ for i in {0..2}; do
     roachprod run ${cluster}:$(($app - $i)) -- "echo export PGDATABASE=defaultdb  >> ~/.bashrc"
     roachprod run ${cluster}:$(($app - $i)) -- "echo export SCALE=100  >> ~/.bashrc"
     roachprod run ${cluster}:$(($app - $i)) -- "source ~/.bashrc"
+    roachprod put ${cluster}:$(($app - $i)) flyway .
 done
 
 # Initialize the pgbench workload

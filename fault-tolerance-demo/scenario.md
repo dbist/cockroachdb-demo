@@ -1,5 +1,56 @@
 Fault Tolerance & Recovery
 
+Step 1. Initialize the workload (on a single client)
+
+docker run --rm -it -m 15g  --cpus=4 \
+ postgres pgbench \
+    --initialize \
+    --host=${PGHOST} \
+    --username=${PGUSER} \
+    --port=${PGPORT} \
+    --no-vacuum \
+    --scale=${SCALE} \
+    --foreign-keys \
+    ${PGDATABASE}
+
+Step 2. Run the workload (on each client)
+
+docker run --rm -it -m 15g --cpus=4 \
+    --volume="$(pwd)"/tpcb-cockroach.sql:/home/ubuntu/tpcb-cockroach.sql \
+    postgres pgbench \
+    --host=${PGHOST} \
+    --username=${PGUSER} \
+    --port=${PGPORT} \
+    --no-vacuum \
+    --file=/home/ubuntu/tpcb-cockroach.sql@1 \
+    --client=30 \
+    --jobs=30 \
+    --scale=${SCALE} \
+    --time=6000 \
+    --failures-detailed \
+    --max-tries=10 \
+    --protocol=prepared \
+    -P 5 \
+    ${PGDATABASE}
+
+docker run --rm -it -m 15g --cpus=4 \
+    postgres pgbench \
+        --host=${PGHOST} \
+        --username=${PGUSER} \
+        --port=${PGPORT} \
+        --no-vacuum \
+        --builtin=tpcb-like@1 \
+        --client=30 \
+        --jobs=30 \
+        --scale=${SCALE} \
+        --time=1800 \
+        --failures-detailed \
+        --max-tries=10 \
+        --protocol=prepared \
+        -P 5 \
+        --connect \
+        ${PGDATABASE}
+
 Step 4. Check the workload
 
 Step 5. Simulate a single node failure
@@ -42,3 +93,24 @@ Step 13. Upgrade a node
 
 roachprod stage ${cluster}:$DOWNED1 release v22.2.2
 roachprod start ${cluster}:$DOWNED1
+
+Step 14. Online Schema Changes (on a random client)
+
+docker run --rm \
+    flyway/flyway \
+    -url=jdbc:postgresql://${PGHOST}:26000/defaultdb \
+    -user=root \
+    -password= \
+    -connectRetries=3 \
+    info
+
+docker run \
+    --rm \
+    -v $PWD/flyway/sql:/flyway/sql \
+    flyway/flyway \
+    -url=jdbc:postgresql://${PGHOST}:26000/defaultdb \
+    -user=root \
+    -password= \
+    -connectRetries=3 \
+    -baselineOnMigrate="true" \
+    migrate

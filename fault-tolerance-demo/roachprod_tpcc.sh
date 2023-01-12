@@ -3,7 +3,7 @@
 ## based on https://www.cockroachlabs.com/docs/stable/demo-fault-tolerance-and-recovery.html
 
 export cluster="${USER}-tpcc"
-export nodes=10
+export nodes=13
 export zones="eastus2"
 export ssd=2
 export version="v22.1.13"
@@ -64,12 +64,12 @@ echo "Run the tpcc workload"
 declare -a app_nodes=(${app1} ${app2} ${app3})
 for i in "${app_nodes[@]}"; do
     roachprod run ${cluster}:$i "./cockroach workload run tpcc \"postgresql://root@${PGHOST}:26000/tpcc?sslmode=disable\" \
-      --active-warehouses 100 \
-      --warehouses 100 \
-      --duration 60m \
+      --active-warehouses 10 \
+      --warehouses 10 \
+      --duration 120m \
       --idle-conns 100 \
       --tolerate-errors \
-      --workers 1000 2>&1 > tpcc.log | tee -a /dev/null" &
+      --workers 100 2>&1 > tpcc.log | tee -a /dev/null" &
 done
 
 # Decommission a node
