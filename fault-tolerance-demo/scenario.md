@@ -23,8 +23,8 @@ docker run --rm -it -m 15g --cpus=4 \
     --port=${PGPORT} \
     --no-vacuum \
     --file=/home/ubuntu/tpcb-cockroach.sql@1 \
-    --client=30 \
-    --jobs=30 \
+    --client=10 \
+    --jobs=10 \
     --scale=${SCALE} \
     --time=6000 \
     --failures-detailed \
@@ -40,10 +40,10 @@ docker run --rm -it -m 15g --cpus=4 \
         --port=${PGPORT} \
         --no-vacuum \
         --builtin=tpcb-like@1 \
-        --client=30 \
-        --jobs=30 \
+        --client=10 \
+        --jobs=10 \
         --scale=${SCALE} \
-        --time=1800 \
+        --time=6000 \
         --failures-detailed \
         --max-tries=10 \
         --protocol=prepared \
